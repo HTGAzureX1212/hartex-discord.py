@@ -66,5 +66,3 @@ class Help(CategoryExtension):
 
 def setup(hartex):
     hartex.add_cog(Help(hartex))
-
-    
