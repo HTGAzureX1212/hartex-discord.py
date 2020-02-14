@@ -10,6 +10,11 @@ class Info(CategoryExtension):
 
     @commands.command()
     async def botinfo(self, ctx):
+        """
+        .botinfo
+
+        Information of the bot.
+        """
 
         infoEmbed = Embed(title="HarTex Info", description="My Information", colour=0xa6f7ff)
         infoEmbed.add_field(name="Owner", value="HTGAzureX1212#2450", inline=True)
@@ -22,39 +27,94 @@ class Info(CategoryExtension):
 
     @commands.command()
     async def guildinfo(self, ctx):
+        current_guild: discord.Guild = ctx.guild
 
-        # The guild the command is ran in
-        guild: Guild = ctx.guild
+        member_counts = {
+            "bot count": 0,
+            "human count": 0
+        }
+        member_statuses = {
+            "online": 0,
+            "idle": 0,
+            "dnd": 0,
+            "offline/invisible": 0
+        }
+        safety_settings = {
+            "2FA setting": current_guild.mfa_level,
+            "Verification Level": current_guild.verification_level
+        }
 
-        # The no. of channels of the guild.
-        channelCount = len(list(guild.channels))
+        # Calculation of the number of bot and human users in a guild.
+        for member in current_guild.members:
+            if member.bot:
+                member_counts['bot count'] += 1
+            else:
+                member_counts['human count'] += 1
 
-        # The no. of text channels of the guild.
-        textChannelCount = len(list(guild.text_channels))
+        # Calculation of the number of members in different statuses in a guild.
+        for member in current_guild.members:
+            if str(member.status) == "online":
+                member_statuses['online'] += 1
+            elif str(member.status) == "idle":
+                member_statuses['idle'] += 1
+            elif str(member.status) == "dnd":
+                member_statuses['dnd'] += 1
+            elif str(member.status) == "offline":
+                member_statuses['offline/invisible'] += 1
 
-        # The no. of voice channels of the guild.
-        voiceChannelCount = len(list(guild.voice_channels))
+        # Verification levels
 
-        guildInfo = Embed(colour=0xa6f7ff)
-        guildInfo.title = "Information of {}".format(guild.name)
-        guildInfo.description = "What is {}?".format(guild.name)
-        guildInfo.add_field(name="Guild Name", value="{}".format(guild.name), inline=False)
-        guildInfo.add_field(name="Guild Owner", value=guild.owner, inline=False)
-        guildInfo.add_field(name="Members", value=str(guild.member_count), inline=False)
-        guildInfo.add_field(name="Channels", value=str(channelCount), inline=False)
-        guildInfo.add_field(name="Text Channels", value=str(textChannelCount), inline=False)
-        guildInfo.add_field(name="Voice Channels", value=str(voiceChannelCount), inline=False)
-        guildInfo.add_field(name="Voice Region", value=guild.region, inline=False)
+        if safety_settings['verification level'] == discord.VerificationLevel.none:
+            safety_settings['verification level'] = "Not set"
+        elif safety_settings['verification level'] == discord.VerificationLevel.low:
+            safety_settings['verification level'] = "Low"
+        elif safety_settings['verification level'] == discord.VerificationLevel.medium:
+            safety_settings['verification level'] = "Moderate"
+        elif safety_settings['verification level'] == discord.VerificationLevel.high or safety_settings['verification level'] == discord.VerificationLevel.table_flip:
+            safety_settings['verification level'] = "High"
+        elif safety_settings['verification level'] == discord.VerificationLevel.extreme or safety_settings['verification level'] == discord.VerificationLevel.double_table_flip:
+            safety_settings['verification level'] = "Extreme"
 
-        await ctx.send("", embed=guildInfo)
+        # Boolean - 2FA enabled
+        if safety_settings['2FA Setting'] == 1:
+            safety_settings['2FA Setting'] = "True"
+        elif safety_settings['2FA Setting'] == 0:
+            safety_settings['2FA Setting'] = "False"
+
+        # Embed
+        guild_info = discord.Embed(title=f"Information of {current_guild.name}", colour=0xa6f7ff)
+        guild_info.add_field(name="Server ID", value=f"{current_guild.id}", inline=False)
+        guild_info.add_field(name="Server Owner, Owner ID", value=f"{current_guild.owner}, {current_guild.owner_id}", inline=False)
+        guild_info.add_field(name="Number of Categories", value=f"{len(current_guild.categories)}", inline=False)
+        guild_info.add_field(name="Number of Text Channels", value=f"{len(current_guild.text_channels)}", inline=False)
+        guild_info.add_field(name="Number of Voice Channels", value=f"{len(current_guild.voice_channels)}", inline=False)
+        guild_info.add_field(name="Members", value=f"Total Number of Members: {current_guild.member_count}\n"
+                                                   f"Human Members: {member_counts['human count']}\n"
+                                                   f"Bot Members: {member_counts['bot count']}\n"
+                                                   f"Status - Online: {member_statuses['online']}\n"
+                                                   f"Status - Idle: {member_statuses['idle']}\n"
+                                                   f"Status - Do Not Disturb: {member_statuses['dnd']}\n"
+                                                   f"Status - Offline: {member_statuses['offline/invisible']}",
+                             inline=False)
+        guild_info.add_field(name="2FA Enabled?", value=f"{safety_settings['2FA Setting']}", inline=False)
+        guild_info.add_field(name="Verification Level", value=f"{safety_settings['verification level']}", inline=False)
+        guild_info.add_field(name="Voice Region", value=f"{current_guild.region}", inline=False)
+        guild_info.add_field(name="Server Created At", value=f"{current_guild.created_at.strftime('%Y/%m/%d %p %l:%M:%S %Z')}", inline=False)
+        guild_info.set_thumbnail(url=current_guild.icon_url)
+
+        await ctx.send(embed=guild_info)
 
     @commands.command()
     async def userinfo(self, ctx, member: discord.Member):
+        """
+        .userinfo <member: discord.Member>
+
+        Information of the user.
+        """
 
         memberRoles = list(role for role in member.roles)
 
-        em = Embed(colour=0xa6f7ff)
-        em.title = "Information of {}".format(member)
+        em = Embed(title=f"Information of {member}", description=f"Who is {member}?", colour=0xa6f7ff)
         em.description = "Who is {}?".format(member)
 
         em.set_thumbnail(url=member.avatar_url)
@@ -67,7 +127,7 @@ class Info(CategoryExtension):
 
         em.add_field(name="Roles: {}".format(len(memberRoles)), value="{}".join(role.mention for role in memberRoles).replace("{}", "\n"))
 
-        em.add_field(name="Top Role", value=member.top_role)
+        em.add_field(name="Top Role", value=member.top_role.mention)
 
         await ctx.send("", embed=em)
 
