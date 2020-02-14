@@ -45,47 +45,69 @@ class HarTex(commands.Bot):  # this is a modified discord.commands.Bot class
         super(HarTex, self).__init__(command_prefix=hartexPrefix, help_command=None)
 
     async def on_ready(self):
-        await self.change_presence(status=discord.Status.online, activity=discord.Activity(name="whatever link", type=discord.ActivityType.watching))
+        await self.change_presence(status=discord.Status.online,
+                                   activity=discord.Activity(name="whatever link", type=discord.ActivityType.watching))
         print('Bot is ready.')
 
-    async def on_command_error(self, ctx, exception):
-        if isinstance(exception, commands.CommandNotFound):
-            errorI = discord.Embed(title="**Command Error**",
-                                   description="This command raised an exception. Read below for more information.",
-                                   colour=0xa6f7ff)
-            errorI.add_field(name="Exception Code", value="HTe001", inline=False)
-            errorI.add_field(name="Exception Description", value="Command not found.", inline=False)
+    async def on_guild_join(self, guild: discord.Guild):
+        guild_id = guild.id
 
-            await ctx.send("", embed=errorI)
+        with open('guilds.yaml', 'r+') as guild_add:
+            content = yaml.safe_load(guild_add)
 
-        if isinstance(exception, commands.MissingRequiredArgument):
-            errorII = discord.Embed(title="**Command Error**",
-                                    description="This command raised an exception. Read below for more information.",
-                                    colour=0xa6f7ff)
-            errorII.add_field(name="Exception Code", value="HTe002", inline=False)
-            errorII.add_field(name="Exception Description", value='A required argument is missing. Execute `.help <command>` to view the required arguments.')
+            content['connected_guilds'].append(guild_id)
 
-            await ctx.send("", embed=errorII)
+            guild_add.seek(0)
 
-        if isinstance(exception, commands.DisabledCommand):
-            errorIII = discord.Embed(title="**Command Error**",
-                                     description="This command raised an exception. Read below for information.",
-                                     colour=0xa6f7ff)
-            errorIII.add_field(name="Exception Code", value="HTe003", inline=False)
-            errorIII.add_field(name="Exception Description", value="This command is disabled. Please enable it in the YAML configuration.")
+            yaml.dump(content, guild_add)
 
-            await ctx.send("", embed=errorIII)
+            guild_add.truncate()
+
+        with open(f'configurations/{guild_id}_config.yaml', 'w+') as guild_yaml_config_add:
+            yaml.dump({'dashboard'.replace("'", ""): [guild.owner_id]}, guild_yaml_config_add, indent=4)
+
+    async def on_guild_remove(self, guild: discord.Guild):
+        guild_id = guild.id
+
+        os.remove(f'configurations/{guild.id}_config.yaml')
+
+        with open('guilds.yaml', 'r+') as guild_remove:
+            content = yaml.safe_load(guild_remove)
+
+            content['connected_guilds'].remove(guild_id)
+
+            guild_remove.seek(0)
+
+            yaml.dump(content, guild_remove)
+
+            guild_remove.truncate()
 
 
 hartex = HarTex()
+
+
+@hartex.command()
+async def load(ctx, extension):
+    await ctx.load_extension(f'cmds/{extension}')
+    await ctx.send(f"Successfully loaded extension: {extension}")
+
+
+@hartex.command()
+async def reload(ctx, extension):
+    await ctx.reload_extension(f'cmds/{extension}')
+    await ctx.send(f"Successfully reloaded extension: {extension}")
+
+
+@hartex.command()
+async def unload(ctx, extension):
+    await ctx.unload_extension(f'cmds/{extension}')
+    await ctx.send(f"Successfully unloaded extension: {extension}")
 
 
 for filename in os.listdir('./cmds'):
     if filename.endswith('.py'):
         hartex.load_extension(f'cmds.{filename[:-3]}')
 
-
 if __name__ == "__main__":
     token = get_hartex_token()
     hartex.run(token)
-    
