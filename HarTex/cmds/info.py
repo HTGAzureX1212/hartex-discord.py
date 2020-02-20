@@ -20,8 +20,8 @@ class Info(CategoryExtension):
         infoEmbed.add_field(name="Owner", value="HTGAzureX1212#2450", inline=True)
         infoEmbed.add_field(name="Created at", value="2 Jan 2020, 09.25 [UCT +0]", inline=True)
         infoEmbed.add_field(name="Current server prefix", value=".", inline=False)
-        infoEmbed.add_field(name="Command count", value="4", inline=False)
-        infoEmbed.add_field(name="Language versions", value="Python 3.8.1\ndiscord.py 1.2.5")
+        infoEmbed.add_field(name="Command count", value="17", inline=False)
+        infoEmbed.add_field(name="Language versions", value="Python 3.8.1\ndiscord.py 1.3.1")
 
         await ctx.send("", embed=infoEmbed)
 
@@ -40,27 +40,27 @@ class Info(CategoryExtension):
             "offline/invisible": 0
         }
         safety_settings = {
-            "2FA setting": current_guild.mfa_level,
-            "Verification Level": current_guild.verification_level
+            "2FA Setting": current_guild.mfa_level,
+            "verification level": current_guild.verification_level
         }
 
         # Calculation of the number of bot and human users in a guild.
         for member in current_guild.members:
             if member.bot:
-                member_counts['bot count'] += 1
+                member_counts["bot count"] += 1
             else:
-                member_counts['human count'] += 1
+                member_counts["human count"] += 1
 
         # Calculation of the number of members in different statuses in a guild.
         for member in current_guild.members:
             if str(member.status) == "online":
-                member_statuses['online'] += 1
+                member_statuses["online"] += 1
             elif str(member.status) == "idle":
-                member_statuses['idle'] += 1
+                member_statuses["idle"] += 1
             elif str(member.status) == "dnd":
-                member_statuses['dnd'] += 1
+                member_statuses["dnd"] += 1
             elif str(member.status) == "offline":
-                member_statuses['offline/invisible'] += 1
+                member_statuses["offline/invisible"] += 1
 
         # Verification levels
 
@@ -88,18 +88,11 @@ class Info(CategoryExtension):
         guild_info.add_field(name="Number of Categories", value=f"{len(current_guild.categories)}", inline=False)
         guild_info.add_field(name="Number of Text Channels", value=f"{len(current_guild.text_channels)}", inline=False)
         guild_info.add_field(name="Number of Voice Channels", value=f"{len(current_guild.voice_channels)}", inline=False)
-        guild_info.add_field(name="Members", value=f"Total Number of Members: {current_guild.member_count}\n"
-                                                   f"Human Members: {member_counts['human count']}\n"
-                                                   f"Bot Members: {member_counts['bot count']}\n"
-                                                   f"Status - Online: {member_statuses['online']}\n"
-                                                   f"Status - Idle: {member_statuses['idle']}\n"
-                                                   f"Status - Do Not Disturb: {member_statuses['dnd']}\n"
-                                                   f"Status - Offline: {member_statuses['offline/invisible']}",
-                             inline=False)
+        guild_info.add_field(name="Members", value=f"Total Number of Members: {current_guild.member_count}\nHuman Members: {member_counts['human count']}\nBot Members: {member_counts['bot count']}\nStatus - Online: {member_statuses['online']}\nStatus - Idle: {member_statuses['idle']}\nStatus - Do Not Disturb: {member_statuses['dnd']}\nStatus - Offline: {member_statuses['offline/invisible']}", inline=False)
         guild_info.add_field(name="2FA Enabled?", value=f"{safety_settings['2FA Setting']}", inline=False)
         guild_info.add_field(name="Verification Level", value=f"{safety_settings['verification level']}", inline=False)
         guild_info.add_field(name="Voice Region", value=f"{current_guild.region}", inline=False)
-        guild_info.add_field(name="Server Created At", value=f"{current_guild.created_at.strftime('%Y/%m/%d %p %l:%M:%S %Z')}", inline=False)
+        guild_info.add_field(name="Server Created At", value=f"{current_guild.created_at}", inline=False)
         guild_info.set_thumbnail(url=current_guild.icon_url)
 
         await ctx.send(embed=guild_info)
