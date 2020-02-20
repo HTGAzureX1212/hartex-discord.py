@@ -347,4 +347,3 @@ class Logging(CategoryExtension):
 
 def setup(hartex):
     hartex.add_cog(Logging(hartex))
-    
