@@ -14,6 +14,7 @@ HarTex is a utilitarian and administration Discord Bot written with discord.py.
 ---
 | Position | Person |
 | :------- | :----- |
+| Main Developer | Harry. |
 
 License: MIT
 ---
