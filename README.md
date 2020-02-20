@@ -6,14 +6,14 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 
 What is HarTex?
-------------------------------
+---
 
 HarTex is a multi-purpose Discord Bot written with discord.py.
 
 Author: HTGAzureX1212#2450.
 
 License: MIT
-------------------------------
+---
 Copyright © Harry, HT Studios™
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of HarTex and
@@ -31,7 +31,3 @@ PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRI
 HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Statistics
------------------------------
-Lines: 1064
