@@ -8,9 +8,10 @@
 What is HarTex?
 ---
 
-HarTex is a multi-purpose Discord Bot written with discord.py.
+HarTex is a utilitarian and administration Discord Bot written with discord.py.
 
-Author: HTGAzureX1212#2450.
+### Development Team
+---
 
 License: MIT
 ---
