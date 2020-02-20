@@ -9,8 +9,6 @@ import random
 
 import asyncio
 
-import decimal
-
 from PIL import Image, ImageDraw, ImageFont
 
 from datetime import datetime, timedelta
