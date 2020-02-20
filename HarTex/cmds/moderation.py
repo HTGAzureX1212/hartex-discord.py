@@ -357,6 +357,56 @@ class Moderation(CategoryExtension):
         await role.edit(permissions=permissionOverride)
         await ctx.send("Successfully unceased guild.")
 
+    @commands.command()
+    async def warn(self, ctx, member: discord.Member, *reasontext):
+        warned_member_guild = member.guild
+
+        reasonoutput = ""
+
+        for word in reasontext:
+            reasonoutput += word
+            reasonoutput += " "
+            reasonoutput.strip()
+
+        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+            accessor = yaml.safe_load(infraction_add)
+
+            infractions = accessor['infractions'][member.id]
+
+        accessor['infractions'][member.id] += 1
+
+        infractions += 1
+
+        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+            yaml.dump(accessor, infraction_add)
+
+        await ctx.send(f"Successfully warned {member} for {reasonoutput}, total warnings: {infractions}")
+
+    @commands.command()
+    async def pardon(self, ctx, member: discord.Member, *reasontext):
+        warned_member_guild = member.guild
+
+        reasonoutput = ""
+
+        for word in reasontext:
+            reasonoutput += word
+            reasonoutput += " "
+            reasonoutput.strip()
+
+        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+            accessor = yaml.safe_load(infraction_add)
+
+            infractions = accessor['infractions'][member.id]
+
+        accessor['infractions'][member.id] -= 1
+
+        infractions -= 1
+
+        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+            yaml.dump(accessor, infraction_add)
+
+        await ctx.send(f"Successfully pardoned {member} for {reasonoutput}, total warnings: {infractions}")
+
 
 def setup(hartex):
     hartex.add_cog(Moderation(hartex))
