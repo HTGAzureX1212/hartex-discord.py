@@ -4,7 +4,6 @@ from discord import Embed
 from discord.ext import commands
 
 from core.classes import *
-from core.configvalues import *
 
 
 class Help(CategoryExtension):
@@ -58,8 +57,8 @@ class Help(CategoryExtension):
             await ctx.send(embed=helpUnmuteEmbed)
         elif command == "tempmute":
             helpTempmuteEmbed = Embed(title="HarTex Help: Tempmute", description="Tempmute: Usage", colour=0xa6f7ff)
-            helpTempmuteEmbed.add_field(name="Usage", value="unban <member: **discord.Member**> <reason: **optional**>", inline=False)
-            helpTempmuteEmbed.add_field(name="Description", value="Unbans a member.", inline=False)
+            helpTempmuteEmbed.add_field(name="Usage", value="tempmute <member: **discord.Member**> <time: **string**> <reason: **optional**>", inline=False)
+            helpTempmuteEmbed.add_field(name="Description", value="Temporarily mutes a member.", inline=False)
 
             await ctx.send(embed=helpTempmuteEmbed)
 
