@@ -25,6 +25,10 @@ HarTex is a utilitarian and administration Discord Bot written with discord.py.
 - Moderation
 - Starboard
 
+### How do I add HarTex to my Discord server?
+---
+Thanks for reaching out to HarTex! To have your bot in the server, you need to fill in [this Google form](https://forms.gle/rwgqkJiMhW3tYt896).
+
 License: MIT
 ---
 Copyright © Harry, HT Studios™
