@@ -7,6 +7,10 @@ import yaml
 
 import os
 
+__author = "Harry."
+
+__version = "1.7.0"
+
 
 def get_hartex_token():
     with open('token.yaml', 'r') as tokenAccessor:
@@ -45,31 +49,37 @@ class HarTex(commands.Bot):  # this is a modified discord.commands.Bot class
         super(HarTex, self).__init__(command_prefix=hartexPrefix, help_command=None)
 
     async def on_ready(self):
-        await self.change_presence(status=discord.Status.online,
-                                   activity=discord.Activity(name="whatever link", type=discord.ActivityType.watching))
+        await self.change_presence(status=discord.Status.online, activity=discord.Activity(name="Harry.#2450 developing", type=discord.ActivityType.watching))
         print('Bot is ready.')
 
     async def on_guild_join(self, guild: discord.Guild):
         guild_id = guild.id
 
-        with open('guilds.yaml', 'r+') as guild_add:
+        with open('guilds.yaml', 'r') as guild_add:
             content = yaml.safe_load(guild_add)
 
-            content['connected_guilds'].append(guild_id)
+            for guildID in content['whitelisted_guilds']:
+                if guild_id == int(guildID):
 
-            guild_add.seek(0)
+                    with open(f'configurations/{guild_id}_config.yaml', 'a+') as guild_yaml_config_add:
+                        yaml.dump({'dashboard'.replace("'", ""): {guild.owner_id: 'admin'.replace("'", "")}}, guild_yaml_config_add, indent=2)
 
-            yaml.dump(content, guild_add)
+                    with open(f'infractions/{guild_id}_infractions.yaml', 'a+') as guild_infractions_add:
+                        yaml.dump({'infractions'.replace("'", "")}, guild_infractions_add, indent=2)
 
-            guild_add.truncate()
-
-        with open(f'configurations/{guild_id}_config.yaml', 'w+') as guild_yaml_config_add:
-            yaml.dump({'dashboard'.replace("'", ""): [guild.owner_id]}, guild_yaml_config_add, indent=4)
+                    with open(f'levels/{guild_id}_levels.yaml', 'a+') as guild_levels_add:
+                        yaml.dump({'levels'.replace("'", "")}, guild_levels_add, indent=2)
+                else:
+                    await guild.leave()
 
     async def on_guild_remove(self, guild: discord.Guild):
         guild_id = guild.id
 
-        os.remove(f'configurations/{guild.id}_config.yaml')
+        os.remove(f'configurations/{guild_id}_config.yaml')
+
+        os.remove(f'infractions/{guild_id}_infractions.yaml')
+
+        os.remove(f'infractions/{guild_id}_infractions.yaml')
 
         with open('guilds.yaml', 'r+') as guild_remove:
             content = yaml.safe_load(guild_remove)
@@ -88,19 +98,19 @@ hartex = HarTex()
 
 @hartex.command()
 async def load(ctx, extension):
-    await ctx.load_extension(f'cmds/{extension}')
+    await ctx.load_extension(f'cmds.{extension}')
     await ctx.send(f"Successfully loaded extension: {extension}")
 
 
 @hartex.command()
 async def reload(ctx, extension):
-    await ctx.reload_extension(f'cmds/{extension}')
+    await ctx.reload_extension(f'cmds.{extension}')
     await ctx.send(f"Successfully reloaded extension: {extension}")
 
 
 @hartex.command()
 async def unload(ctx, extension):
-    await ctx.unload_extension(f'cmds/{extension}')
+    await ctx.unload_extension(f'cmds.{extension}')
     await ctx.send(f"Successfully unloaded extension: {extension}")
 
 
