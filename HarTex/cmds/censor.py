@@ -5,6 +5,8 @@ import re
 
 import yaml
 
+from better_profanity import profanity
+
 from core.classes import *
 
 
@@ -62,6 +64,33 @@ def is_domains_nickname_enabled(guild_id):
     return nick_enabled
 
 
+def get_censored_words(guild_id):
+    with open(f'configurations/{guild_id}_config.yaml', 'r') as censored_words:
+        accessor = yaml.safe_load(censored_words)
+
+        list_of_censored_words = accessor['plugins']['censorship']['settings']['blocked']['words']
+
+    return list_of_censored_words
+
+
+def get_ignored_users(guild_id):
+    with open(f'configurations/{guild_id}_config.yaml', 'r') as censored_words:
+        accessor = yaml.safe_load(censored_words)
+
+        list_of_ignored_users = accessor['plugins']['censorship']['settings']['blocked']['ignored_users']
+
+    return list_of_ignored_users
+
+
+def is_zalgo_enabled(guild_id):
+    with open(f'configurations/{guild_id}_config.yaml', 'r') as zalgo_prevention_enabled:
+        accessor = yaml.safe_load(zalgo_prevention_enabled)
+
+        enabled = accessor['plugins']['censorship']['settings']['zalgo']['filter']
+
+    return enabled
+
+
 class Censor(commands.Cog):
 
     @commands.Cog.listener()
@@ -69,54 +98,25 @@ class Censor(commands.Cog):
         if message.author.bot:
             return
 
-        message_guild = message.guild
+        message_guild: discord.Guild = message.guild
 
-        def get_censored_words():
-            with open(f'configurations/{message_guild.id}_config.yaml', 'r') as censored_words:
-                accessor = yaml.safe_load(censored_words)
+        list_to_censor = get_censored_words(message_guild.id)
 
-                list_of_censored_words = accessor['plugins']['censorship']['settings']['blocked']['words']
+        profanity.load_censor_words(list_to_censor)
 
-            return list_of_censored_words
+        ignored_users = get_ignored_users(message_guild.id)
 
-        def get_ignored_users():
-            with open(f'configurations/{message_guild.id}_config.yaml', 'r') as censored_words:
-                accessor = yaml.safe_load(censored_words)
+        if profanity.contains_profanity(message.content):
+            for user in ignored_users:
+                if message.author.id == user:
+                    pass
+                else:
+                    await message.channel.send("Blacklisted word!")
+                    await message.delete()
+        else:
+            pass
 
-                list_of_censored_words = accessor['plugins']['censorship']['settings']['blocked']['ignored_users']
-
-            return list_of_censored_words
-
-        censored_word = get_censored_words()
-
-        ignored_users = get_ignored_users()
-
-        for word in censored_word:
-            if word in message.content:
-                for user in ignored_users:
-                    if user == message.author.id:
-                        pass
-
-                        break
-                    else:
-                        await message.delete()
-                        await message.channel.send("Blacklisted word!")
-
-                        break
-                break
-            else:
-                continue
-
-
-        def is_zalgo_enabled():
-            with open(f'configurations/{message_guild.id}_config.yaml', 'r') as zalgo_prevention_enabled:
-                accessor = yaml.safe_load(zalgo_prevention_enabled)
-
-                enabled = accessor['plugins']['censorship']['settings']['zalgo']['filter']
-
-            return enabled
-
-        zalgo_enabled = is_zalgo_enabled()
+        zalgo_enabled = is_zalgo_enabled(message_guild.id)
 
         zalgo_re = re.compile(r"[\u0300-\u036F\u0489]")
 
@@ -142,7 +142,7 @@ class Censor(commands.Cog):
 
         if domains:
             for domain in domain_blacklist:
-                if domain in message.content:
+                if str(domain) in message.content:
                     await message.delete()
 
                     await message.channel.send("This domain is blacklisted!")
@@ -171,18 +171,17 @@ class Censor(commands.Cog):
 
         zalgo_nick_re = re.compile(r"[\u0300-\u036F\u0489]")
 
-        for nickname in censored_nickname:
-            if nickname in after.nick:
+        if censored_nickname == "True":
+            if profanity.contains_profanity(str(before.nick)):
+
                 last = before.nick
 
                 if last:
                     await after.edit(nick=last)
                 else:
                     await after.edit(nick="Nickname Censored")
-
-                    break
             else:
-                continue
+                pass
 
         if zalgo_nick_enabled:
             if zalgo_nick_re.search(after.nick):
@@ -214,7 +213,7 @@ class Censor(commands.Cog):
 
         if domain_blacklist_enabled:
             for domain in domain_list:
-                if domain in after.nick:
+                if str(domain) in after.nick:
                     last = before.nick
 
                     if last:
