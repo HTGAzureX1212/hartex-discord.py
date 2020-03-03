@@ -18,12 +18,17 @@ HarTex is a utilitarian and administration Discord Bot written with discord.py.
 
 ### Plugins
 ---
+- Administration
+- Antispam
 - Audit Logging
 - Autolevelling
 - Censor
-- General
+- Global
+- Information
+- Infractions
 - Moderation
 - Starboard
+- Utilities
 
 ### How do I add HarTex to my Discord server?
 ---
