@@ -13,6 +13,7 @@ import yaml
 class Moderation(CategoryExtension):
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *reasontext):
         """
         .kick <member: discord.Member> <reasontext(optional)>
@@ -37,6 +38,18 @@ class Moderation(CategoryExtension):
 
             return channel_id
 
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            accessor = yaml.safe_load(infraction_add)
+
+            infractions = accessor['infractions'][member.id]
+
+        accessor['infractions'][member.id] += 1
+
+        infractions += 1
+
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            yaml.dump(accessor, infraction_add)
+
         # Kicks the member.
         await member.kick(reason=reasonoutput)
 
@@ -54,6 +67,7 @@ class Moderation(CategoryExtension):
         await channelID.send(embed=kickEmbed)
 
     @commands.command()
+    @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *reasontext):
         """
         .ban <member: discord.Member> <reasontext(optional)>
@@ -78,6 +92,18 @@ class Moderation(CategoryExtension):
 
             return channel_id
 
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            accessor = yaml.safe_load(infraction_add)
+
+            infractions = accessor['infractions'][member.id]
+
+        accessor['infractions'][member.id] += 1
+
+        infractions += 1
+
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            yaml.dump(accessor, infraction_add)
+
         channelID = get_channel_id()
 
         kickEmbed = discord.Embed(title=":hammer: A Member has been Banned from the server", colour=0xa6f7ff)
@@ -95,6 +121,7 @@ class Moderation(CategoryExtension):
         await ctx.send(f"Successfully banned {member} for {reasonoutput}.")
 
     @commands.command()
+    @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member: discord.Member, *reasontext):
         """
         .unban <member: discord.Member> <reasontext(optional)>
@@ -136,6 +163,7 @@ class Moderation(CategoryExtension):
         await ctx.send(f"Successfully unbanned {member} for {reasonoutput}.")
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     async def mute(self, ctx, member: discord.Member, *reasontext):
         """
         .mute <member: discord.Member> <reasontext(optional)>
@@ -161,6 +189,26 @@ class Moderation(CategoryExtension):
 
             return channel_id
 
+        def get_muted_role():
+            with open(f'configurations/{guild_to_load_config.id}_config.yaml', 'r') as muted_role:
+                role_accessor = yaml.safe_load(muted_role)
+
+                role: discord.Role = discord.utils.get(ctx.guild.roles, id=role_accessor['plugins']['moderation']['muted_role'])
+
+            return role
+
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            accessor = yaml.safe_load(infraction_add)
+
+            infractions = accessor['infractions'][member.id]
+
+        accessor['infractions'][member.id] += 1
+
+        infractions += 1
+
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            yaml.dump(accessor, infraction_add)
+
         channelID = get_channel_id()
 
         kickEmbed = discord.Embed(title=":no_mouth: A Member has been Muted from the server", colour=0xa6f7ff)
@@ -171,16 +219,14 @@ class Moderation(CategoryExtension):
 
         await channelID.send(embed=kickEmbed)
 
-        # Looks for the Muted role in the corresponding guild.
-        mutedRole = get(ctx.guild.roles, name="Muted")
-
         # Adds the role to the mentioned member.
-        await member.add_roles(mutedRole)
+        await member.add_roles(get_muted_role())
 
         # Sends a confirmation message.
         await ctx.send(f"Successfully muted {member} for {reasonoutput}.")
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     async def unmute(self, ctx, member: discord.Member, *reasontext):
         """
         .unmute <member: discord.Member> <reasontext(optional)>
@@ -206,6 +252,14 @@ class Moderation(CategoryExtension):
 
             return channel_id
 
+        def get_muted_role():
+            with open(f'configurations/{guild_to_load_config.id}_config.yaml', 'r') as muted_role:
+                role_accessor = yaml.safe_load(muted_role)
+
+                role: discord.Role = discord.utils.get(ctx.guild.roles, id=role_accessor['plugins']['moderation']['muted_role'])
+
+            return role
+
         channelID = get_channel_id()
 
         kickEmbed = discord.Embed(title=":open_mouth: A Member has been Unmuted from the server", colour=0xa6f7ff)
@@ -216,16 +270,14 @@ class Moderation(CategoryExtension):
 
         await channelID.send(embed=kickEmbed)
 
-        # Looks for the Muted role in the corresponding guild.
-        mutedRole = get(ctx.guild.roles, name="Muted")
-
         # Removes the role to the mentioned member.
-        await member.remove_roles(mutedRole)
+        await member.remove_roles(get_muted_role())
 
         # Sends a confirmation message.
         await ctx.send(f"Successfully unmuted {member} for {reasonoutput}.")
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     async def tempmute(self, ctx, member: discord.Member, time: str,  *reasontext):
         """
         .tempmute <member: discord.Member> <time> <reasontext(optional)>
@@ -263,6 +315,26 @@ class Moderation(CategoryExtension):
 
             return channel_id
 
+        def get_muted_role():
+            with open(f'configurations/{guild_to_load_config.id}_config.yaml', 'r') as muted_role:
+                role_accessor = yaml.safe_load(muted_role)
+
+                role: discord.Role = discord.utils.get(ctx.guild.roles, id=role_accessor['plugins']['moderation']['muted_role'])
+
+            return role
+
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            accessor = yaml.safe_load(infraction_add)
+
+            infractions = accessor['infractions'][member.id]
+
+        accessor['infractions'][member.id] += 1
+
+        infractions += 1
+
+        with open(f'infractions/{guild_to_load_config.id}_infractions.yaml', 'r+') as infraction_add:
+            yaml.dump(accessor, infraction_add)
+
         channelID = get_channel_id()
 
         kickEmbed = discord.Embed(title=":no_mouth: A Member has been Temp-muted from the server", colour=0xa6f7ff)
@@ -273,20 +345,17 @@ class Moderation(CategoryExtension):
 
         await channelID.send(embed=kickEmbed)
 
-        # Looks for the Muted role in the corresponding guild.
-        mutedRole = get(ctx.guild.roles, name="Muted")
-
         # Confirmation message.
         await ctx.send(f"Successfully muted {member} for {sleepDuration}s for {reasonoutput}.")
 
         # Adds the Muted role.
-        await member.add_roles(mutedRole)
+        await member.add_roles(get_muted_role())
 
         # Sleeps for the sleepDuration.
         await sleep(sleepDuration)
 
         # Removes the role to the mentioned member.
-        await member.remove_roles(mutedRole)
+        await member.remove_roles(get_muted_role())
 
         # Sends another confirmation message for unmuted.
         await ctx.send("{} has been unmuted.".format(member))
@@ -298,6 +367,7 @@ class Moderation(CategoryExtension):
         await channelID.send(embed=kickEmbed)
 
     @commands.command()
+    @commands.has_permissions(manage_channels=True)
     async def ceasech(self, ctx, channel: discord.TextChannel):
         """
         .ceasech <channel: discord.TextChannel>
@@ -312,6 +382,7 @@ class Moderation(CategoryExtension):
         await ctx.send(f"{channel} has been ceased.")
 
     @commands.command()
+    @commands.has_permissions(manage_channels=True)
     async def unceasech(self, ctx, channel: discord.TextChannel):
         """
         .unceasech <channel: discord.TextChannel>
@@ -326,6 +397,7 @@ class Moderation(CategoryExtension):
         await ctx.send(f"{channel} has been unceased.")
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def ceasegd(self, ctx):
         """
         .ceasegd
@@ -342,6 +414,7 @@ class Moderation(CategoryExtension):
         await ctx.send("Successfully ceased guild.")
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)
     async def unceasegd(self, ctx):
         """
         .unceasegd
@@ -358,6 +431,7 @@ class Moderation(CategoryExtension):
         await ctx.send("Successfully unceased guild.")
 
     @commands.command()
+    @commands.has_permissions(kick_members=True)
     async def warn(self, ctx, member: discord.Member, *reasontext):
         warned_member_guild = member.guild
 
@@ -368,44 +442,31 @@ class Moderation(CategoryExtension):
             reasonoutput += " "
             reasonoutput.strip()
 
-        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
-            accessor = yaml.safe_load(infraction_add)
+        try:
+            with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+                accessor = yaml.safe_load(infraction_add)
 
-            infractions = accessor['infractions'][member.id]
+                infractions = accessor['infractions'][member.id]
 
-        accessor['infractions'][member.id] += 1
+            accessor['infractions'][member.id] += 1
 
-        infractions += 1
+            infractions += 1
 
-        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
-            yaml.dump(accessor, infraction_add)
+            with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+                yaml.dump(accessor, infraction_add)
+        except KeyError:
+            with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
+                yaml.dump(accessor, infraction_add)
 
-        await ctx.send(f"Successfully warned {member} for {reasonoutput}, total warnings: {infractions}")
+        await ctx.send(f"Successfully warned {member} for {reasonoutput}.")
 
     @commands.command()
-    async def pardon(self, ctx, member: discord.Member, *reasontext):
-        warned_member_guild = member.guild
+    @commands.has_permissions(manage_messages=True)
+    async def purge(self, ctx, amount_of_messages):
+        channel_to_purge: discord.TextChannel = ctx.channel
 
-        reasonoutput = ""
-
-        for word in reasontext:
-            reasonoutput += word
-            reasonoutput += " "
-            reasonoutput.strip()
-
-        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
-            accessor = yaml.safe_load(infraction_add)
-
-            infractions = accessor['infractions'][member.id]
-
-        accessor['infractions'][member.id] -= 1
-
-        infractions -= 1
-
-        with open(f'infractions/{warned_member_guild.id}_infractions.yaml', 'r+') as infraction_add:
-            yaml.dump(accessor, infraction_add)
-
-        await ctx.send(f"Successfully pardoned {member} for {reasonoutput}, total warnings: {infractions}")
+        await channel_to_purge.purge(limit=int(amount_of_messages))
+        await ctx.send(f"Successfully deleted {amount_of_messages} messages!")
 
 
 def setup(hartex):
